@@ -114,6 +114,7 @@ It never overwrites an existing allowlist or settings file, so it is safe to re-
 ```text
 .
 ├── README.md
+├── LICENSE
 ├── install.sh
 ├── config/
 │   ├── projects.example
@@ -364,3 +365,7 @@ sudo journalctl -u docker-compose-weekly-update.service -n 200 --no-pager
 - [Docker Compose `up`](https://docs.docker.com/reference/cli/docker/compose/up/)
 - [systemd.timer](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html)
 - [systemd.time calendar events](https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html#Calendar%20Events)
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
