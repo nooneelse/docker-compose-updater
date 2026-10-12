@@ -1,7 +1,15 @@
 # Configure this file at /etc/docker-compose-updater/projects.
 # Add one absolute directory path per line. Each directory must contain a
 # supported Compose file (compose.yaml, compose.yml, docker-compose.yaml, or
-# docker-compose.yml). Uncomment and replace these examples with real paths.
+# docker-compose.yml) unless files= is given. Override files
+# (compose.override.yaml) and COMPOSE_FILE from .env are honoured.
+#
+# Optional per-project settings follow the path as key=value:
+#   files=a.yml,b.yml     explicit Compose files, relative to the directory
+#   wait_timeout=300      seconds to wait for healthy services
+#   remove_orphans=yes    pass --remove-orphans to "up"
+#
+# Uncomment and replace these examples with real paths.
 # /opt/stacks/traefik
-# /opt/stacks/vaultwarden
-# /opt/stacks/monitoring
+# /opt/stacks/vaultwarden wait_timeout=300
+# /opt/stacks/monitoring files=compose.yaml,compose.prod.yaml remove_orphans=yes

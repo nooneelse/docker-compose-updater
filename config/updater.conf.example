@@ -1,0 +1,57 @@
+# Settings for docker-compose-weekly-update.
+# Install at /etc/docker-compose-updater/updater.conf (root-owned, not
+# writable by group or others). The file is sourced by Bash, so use
+# KEY=value with no spaces around "=" and quote values containing spaces.
+# Every setting is optional; the values shown are the defaults.
+# An environment variable of the same name overrides this file.
+
+# When the update runs, as a systemd calendar expression in the server's
+# local timezone (check one with: systemd-analyze calendar "EXPRESSION").
+# After changing these two, apply them with:
+#   sudo docker-compose-weekly-update --apply-schedule
+# Examples: "Sun *-*-* 04:00:00" weekly, "*-*-* 03:30:00" daily,
+# "Mon,Thu *-*-* 02:00:00" twice a week, "*-*-01 05:00:00" monthly.
+#SCHEDULE="Sun *-*-* 04:00:00"
+
+# Random delay added to each run, so several servers do not all pull at once.
+# Use 0 to run at the exact time.
+#SCHEDULE_RANDOM_DELAY=15m
+
+# Allowlist of Compose project directories.
+#PROJECTS_FILE=/etc/docker-compose-updater/projects
+
+# Seconds to wait for services to become running/healthy after "up".
+# Can be overridden per project with wait_timeout=N in the allowlist.
+#WAIT_TIMEOUT=120
+
+# Hard limit in seconds for each docker command (config, pull, up, prune).
+# A stuck command is killed and the project is marked failed. 0 disables it.
+#COMMAND_TIMEOUT=1800
+
+# Pass --remove-orphans to "up" (yes/no). Per project: remove_orphans=yes.
+#REMOVE_ORPHANS=no
+
+# Image cleanup after the run:
+#   dangling  remove untagged images left behind by updated tags
+#   all       remove every image not used by a container and older than
+#             PRUNE_UNTIL, including images of stacks that are stopped
+#   none      never prune
+#PRUNE_IMAGES=dangling
+#PRUNE_UNTIL=168h
+
+# Shell command that receives the run summary on stdin, with
+# UPDATER_STATUS (success|failure), UPDATER_UPDATED, UPDATER_UNCHANGED and
+# UPDATER_FAILED in its environment. Limited to 60 seconds.
+#NOTIFY_COMMAND='curl -fsS -H "Title: Compose update $UPDATER_STATUS" --data-binary @- https://ntfy.sh/your-topic'
+#NOTIFY_COMMAND='mail -s "Compose update $UPDATER_STATUS" admin@example.com'
+
+# When to run NOTIFY_COMMAND: never, failure, change (failure or at least
+# one project updated), or always.
+#NOTIFY_ON=failure
+
+# Seconds to wait for another run to release the lock before giving up.
+#LOCK_WAIT=0
+#LOCK_FILE=/run/lock/docker-compose-weekly-update.lock
+
+# Validate projects and print the commands without pulling or deploying.
+#DRY_RUN=no

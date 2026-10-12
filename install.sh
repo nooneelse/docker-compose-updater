@@ -38,13 +38,27 @@ else
     echo "Keeping existing /etc/docker-compose-updater/projects unchanged."
 fi
 
-systemctl daemon-reload
+if [[ ! -e /etc/docker-compose-updater/updater.conf ]]; then
+    install -o root -g root -m 0640 \
+        "$ROOT_DIR/config/updater.conf.example" \
+        /etc/docker-compose-updater/updater.conf
+    echo "Created /etc/docker-compose-updater/updater.conf with all settings commented out (defaults apply)."
+else
+    echo "Keeping existing /etc/docker-compose-updater/updater.conf unchanged."
+fi
+
+/usr/local/sbin/docker-compose-weekly-update --apply-schedule
 systemctl enable --now docker-compose-weekly-update.timer
 
 echo
 echo "Installed. Review the project allowlist before the first run:"
 echo "  sudo nano /etc/docker-compose-updater/projects"
-echo "Test manually with:"
+echo "Adjust settings (schedule, timeouts, pruning, notifications) in:"
+echo "  sudo nano /etc/docker-compose-updater/updater.conf"
+echo "After changing SCHEDULE, apply it with:"
+echo "  sudo /usr/local/sbin/docker-compose-weekly-update --apply-schedule"
+echo "Preview, then test manually with:"
+echo "  sudo /usr/local/sbin/docker-compose-weekly-update --dry-run"
 echo "  sudo /usr/local/sbin/docker-compose-weekly-update"
 echo "Check the schedule with:"
 echo "  systemctl list-timers --all docker-compose-weekly-update.timer"

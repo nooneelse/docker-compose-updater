@@ -1,15 +1,16 @@
 [Unit]
 Description=Weekly Docker Compose image update
-Wants=docker.service
-After=docker.service network-online.target
 Requires=docker.service
+Wants=network-online.target
+After=docker.service network-online.target
 
 [Service]
 Type=oneshot
 User=root
 Group=root
 ExecStart=/usr/local/sbin/docker-compose-weekly-update
-TimeoutStartSec=infinity
+# Backstop for the whole run; per-command limits come from COMMAND_TIMEOUT.
+TimeoutStartSec=6h
 UMask=0027
 StandardOutput=journal
 StandardError=journal
