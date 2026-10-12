@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PROJECTS_FILE="${PROJECTS_FILE:-/etc/docker-compose-updater/projects}"
+LOCK_FILE="${LOCK_FILE:-/run/lock/docker-compose-weekly-update.lock}"
+
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+    echo "Another update run is already in progress."
+    exit 0
+fi
+
+if [[ ! -r "$PROJECTS_FILE" ]]; then
+    echo "ERROR: Cannot read $PROJECTS_FILE" >&2
+    exit 1
+fi
+
+command -v docker >/dev/null || {
+    echo "ERROR: Docker is not installed or not in PATH." >&2
+    exit 1
+}
+docker compose version
+
+failed=0
+processed=0
+
+while IFS= read -r project || [[ -n "$project" ]]; do
+    [[ -z "${project//[[:space:]]/}" ]] && continue
+    [[ "$project" =~ ^[[:space:]]*# ]] && continue
+
+    project="${project#"${project%%[![:space:]]*}"}"
+    project="${project%"${project##*[![:space:]]}"}"
+
+    echo
+    echo "========================================"
+    echo "Updating: $project"
+    echo "========================================"
+
+    if [[ "$project" != /* || ! -d "$project" ]]; then
+        echo "ERROR: Invalid project directory: $project" >&2
+        failed=1
+        continue
+    fi
+
+    compose_file=""
+    for candidate in compose.yaml compose.yml docker-compose.yaml docker-compose.yml; do
+        if [[ -f "$project/$candidate" ]]; then
+            compose_file="$candidate"
+            break
+        fi
+    done
+
+    if [[ -z "$compose_file" ]]; then
+        echo "ERROR: No supported Compose file found in $project" >&2
+        failed=1
+        continue
+    fi
+
+    if ! (cd "$project" && docker compose -f "$compose_file" config -q); then
+        echo "ERROR: Invalid Compose configuration: $project" >&2
+        failed=1
+        continue
+    fi
+
+    if ! (cd "$project" && docker compose -f "$compose_file" pull --ignore-buildable); then
+        echo "ERROR: Image pull failed: $project" >&2
+        failed=1
+        continue
+    fi
+
+    if ! (cd "$project" && docker compose -f "$compose_file" up -d --wait --wait-timeout 120); then
+        echo "ERROR: Deployment failed: $project" >&2
+        failed=1
+        continue
+    fi
+
+    echo "SUCCESS: $project"
+    ((processed += 1))
+done < "$PROJECTS_FILE"
+
+echo
+echo "Update run finished. Successful projects: $processed"
+if (( failed != 0 )); then
+    echo "WARNING: One or more projects failed." >&2
+    exit 1
+fi

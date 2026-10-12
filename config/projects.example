@@ -1,0 +1,7 @@
+# Configure this file at /etc/docker-compose-updater/projects.
+# Add one absolute directory path per line. Each directory must contain a
+# supported Compose file (compose.yaml, compose.yml, docker-compose.yaml, or
+# docker-compose.yml). Uncomment and replace these examples with real paths.
+# /opt/stacks/traefik
+# /opt/stacks/vaultwarden
+# /opt/stacks/monitoring
