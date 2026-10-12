@@ -1,4 +1,22 @@
+# Environment files and secrets
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.kdbx
+
+# Real configuration (only the *.example files belong in the repository)
+config/projects
+config/updater.conf
+
+# Logs
 *.log
+
+# Local tooling state
+.claude/
+.remember/
